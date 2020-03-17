@@ -14,6 +14,12 @@ from sklearn.model_selection import train_test_split
 
 import numpy as np
 
+# Graphing library
+import seaborn as sns; sns.set()
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+
+# Import the text files as a set of screenwriter, script dict items
 def get_texts(remove_stop=False):
 	sws = [folder for folder in os.listdir('data') if not folder.startswith('.') ]
 
@@ -35,10 +41,10 @@ def get_texts(remove_stop=False):
 	return sw_scripts
 
 
+# Convert the imported screenplays into usable data
 # Change the chunk length to get a different sized word byte for training
 def get_data(chunk_length=80):
 	sws = get_texts()
-	
 	data = []
 	target = []
 
@@ -53,6 +59,7 @@ def get_data(chunk_length=80):
 		n+=1
 
 	return data, target
+
 
 # Generalized tester function
 # Usage: Pass a dictionary of (paramater, possible_tunings) key value pairs and GridSearch will optimize across them
@@ -75,18 +82,34 @@ def test_model(clf, train_data, train_target, test_data, test_target, tuned_para
 	predicted_train = gs.predict(train_data)
 	avg_train = np.mean(predicted_train == train_target)
 
-	return avg_test, avg_train, results
+	return predicted_test
 
 
+def generate_confusion(y_test, y_pred):
+	names = [name for name in get_texts()]
+
+	conf_mat = confusion_matrix(y_test, y_pred)
+	fig, ax = plt.subplots(figsize=(10,10))
+	sns.heatmap(conf_mat, xticklabels=names, yticklabels=names, annot=True, fmt='d',)
+	plt.ylabel('Actual')
+	plt.xlabel('Predicted')
+	plt.title('Actual and predicted screenwriters for screenplay snippets')
+
+	bottom, top = ax.get_ylim()
+	ax.set_ylim(bottom + 0.5, top - 0.5)
+
+	plt.show()
+
+
+# Predict the screenwriter of a script!
 def predict_scripts():
 	X, y = get_data()
 
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
 
-	avg_test, avg_train, results = test_model(LogisticRegression(), X_train, y_train, X_test, y_test)
+	y_pred = test_model(LogisticRegression(), X_train, y_train, X_test, y_test)
 
-	print(avg_test)
-	print(avg_train)
+	generate_confusion(y_test, y_pred)
 
 
 predict_scripts()
