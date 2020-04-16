@@ -63,7 +63,7 @@ def generate_confusion(labels, predictor, acc, y_test, y_pred):
 
 	plt.tight_layout()
 
-	plt.savefig('visuals/w_pixar/'+predictor+"")
+	plt.savefig('visuals/'+predictor+"")
 
 
 # Predict the screenwriter of a script!
@@ -80,6 +80,7 @@ def predict_scripts(predictor, no_pixar=True):
 	df = pd.DataFrame(g.apply(lambda x: x.sample(g.size().min()).reset_index(drop=True)))	
 
 	X = df['text']
+
 	y = df[predictor]
 
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
@@ -90,8 +91,8 @@ def predict_scripts(predictor, no_pixar=True):
 	generate_confusion(classes, predictor, acc, y_test, y_pred)
 
 
-predictors = ['title', 'screenwriter', 'production_company','genre1','genre2']
+predictors = ['director','screenwriter', 'title', 'production_company',  'genre1','genre2']
 for predictor in predictors:
 	print(predictor)
-	predict_scripts(predictor, no_pixar=False)
+	predict_scripts(predictor, no_pixar=True)
 
